@@ -8,3 +8,9 @@ data DeathAnimation = DeathAnimation
     position :: Point, -- Position where the death occurred
     colour :: Color -- Color of the death animation,
   }
+
+createDeathAnimation :: Float -> Point -> Color -> [DeathAnimation]
+
+drawDeath :: DeathAnimation -> [Picture]
+
+updateDeathAnimation :: DeathAnimation -> [DeathAnimation]

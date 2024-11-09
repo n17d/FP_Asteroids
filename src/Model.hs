@@ -60,3 +60,15 @@ show East = "East"
 show South = "South"
 show West = "West"
 
+-- | These functions handle updates to the gamestate
+updateGameState :: GameState -> GameState
+
+-- These functions check the state of the game
+checkAsteroid :: GameState -> Bool
+
+-- | These functions handle movement
+movePlayer :: GameState -> Player
+moveEnemy :: GameState -> Enemy -> Enemy
+
+-- | These functions handle drawing
+drawPlayer :: Player -> [Picture]
