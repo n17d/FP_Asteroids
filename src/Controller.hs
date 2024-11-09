@@ -10,6 +10,7 @@ import System.Exit (exitSuccess)
 import System.Random
 import Helper
 import Bullet
+import Asteroid
 
 -- | Handle one iteration
 step :: Float -> GameState -> IO GameState
@@ -34,3 +35,9 @@ input (EventKey key Up _ _) g@GameState{player = p, rotatingLeft = left, rotatin
   | key `elem` [Char 'w', SpecialKey KeyUp] = 
       return g { player = p { forward = False } }
 input _ g = return g  -- Catch-all pattern for other events
+
+updateGameState :: Float -> GameState -> IO GameState
+updateGameState _ gs@GameState{asteroids = as} = do
+  newAsteroid <- createAsteroid
+  let updatedAsteroids = updateAsteroids (newAsteroid : as)
+  return gs {asteroids = updatedAsteroids}

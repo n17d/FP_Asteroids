@@ -10,6 +10,7 @@ import Helper
 import System.IO
 import System.Random
 import Bullet
+import Asteroid
 
 -- Datatypes
 data State = Pause | Play | GameOver
@@ -22,6 +23,7 @@ data GameState = GameState
   { state :: State,
     player :: Player,
     bullets :: [Bullet],
+    asteroids :: [Asteroid],
     rotatingLeft :: Bool,   -- Track if 'a' or left arrow is held down
     rotatingRight :: Bool,  -- Track if 'd' or right arrow is held down
     time :: Float -- Tracks time
@@ -53,7 +55,7 @@ drawPlayer p@Player{position = (x, y), direction = dir} =   [ translate x y $ ro
       [ color green (polygon [(-2, -2), (2, -2), (0, 2)]) ] ]
 
 initialState :: GameState
-initialState = GameState {player = initialPlayer, state = Play, rotatingLeft = False, rotatingRight = False, bullets = [], time = 0}
+initialState = GameState {player = initialPlayer, state = Play, rotatingLeft = False, rotatingRight = False, bullets = [], asteroids = [], time = 0}
 
 initialPlayer :: Player
 initialPlayer = Player {position = (0, 0), direction = 0, lives = 3, speed = 0, rotation = 0, forward = False}
