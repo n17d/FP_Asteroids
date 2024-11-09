@@ -30,8 +30,7 @@ data Player = Player
   }
 
 drawPlayer :: Player -> [Picture]
-drawPlayer p@Player{position = (x, y), direction = dir} = [translate x y $ rotate dir $ 
-    pictures 
+drawPlayer p@Player{position = (x, y), direction = dir} = [ pictures 
       [ color blue (rectangleSolid 100 20),                      -- Body of the plane
         color red (polygon [(-50, 0), (-80, 30), (-80, -30)]),  -- Left wing
         color red (polygon [(50, 0), (80, 30), (80, -30)]),     -- Right wing
