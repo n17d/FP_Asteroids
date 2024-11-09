@@ -11,64 +11,36 @@ import System.IO
 import System.Random
 
 -- Datatypes
+data State = Pause | Play | GameOver
+  deriving (Eq)
+
+data EnemyShip = Easy | Medium | Hard
+  deriving (Eq)
+
 data GameState = GameState
   { state :: State,
-    deathAnimations :: [DeathAnimation],
-    elapsedTime :: Float,
-    field :: Field,
-    pSpaceship :: Player,
-    eSpaceships :: [Enemy],
-    randomize :: StdGen,
-    bullets :: [Bullet],
-    score :: (Int, Int)
-  }
-
-data Enemy = Enemy
-  { name :: EnemyShip, -- Type or name of the enemy ship
-    spawnlocation :: Point, -- Where the enemy spawns
-    edirection :: Direction, -- Direction the enemy is facing
-    targetField :: Point, -- Target location on the field
-    speed :: Float, -- Speed of the enemy
-    health :: Int, -- Enemy's health points
+    player :: Player
   }
 
 data Player = Player
   { position :: Point, -- Player's position
-    direction :: Direction, -- Player look direction
     lives :: Int, -- Number of lives the player has
     speed :: Float, -- Player's movement speed
+    direction :: Float -- Player's direction
   }
 
-data Bullet = Bullet
-  { bulletPos :: (Float, Float), -- Bullet's current position (x, y)
-    bulletSpeed :: Float -- Bullet's speed
-  }
-
-data Field = Field
-  { file :: String, -- Filename or identifier of the field
-    size :: (Float, Float), -- Dimensions of the field
-    asteroids :: [(Point, Point)], -- List of asteroids as tuples of points
-    enemySpawn :: Point, -- Spawn point for enemies
-    playerSpawn :: Point -- Spawn point for the player
-  }
-
-data Direction = North | East | South | West | None deriving (Eq, Show)
-
-instance Show Direction where
-show North = "North"
-show East = "East"
-show South = "South"
-show West = "West"
-
--- | These functions handle updates to the gamestate
-updateGameState :: GameState -> GameState
-
--- These functions check the state of the game
-checkAsteroid :: GameState -> Bool
-
--- | These functions handle movement
-movePlayer :: GameState -> Player
-moveEnemy :: GameState -> Enemy -> Enemy
-
--- | These functions handle drawing
 drawPlayer :: Player -> [Picture]
+drawPlayer p@Player{position = (x, y), direction = dir} = [translate x y $ rotate dir $ 
+    pictures 
+      [ color blue (rectangleSolid 100 20),                      -- Body of the plane
+        color red (polygon [(-50, 0), (-80, 30), (-80, -30)]),  -- Left wing
+        color red (polygon [(50, 0), (80, 30), (80, -30)]),     -- Right wing
+        color green (polygon [(0, 10), (10, 40), (-10, 40)]),   -- Tail fin
+        color green (polygon [(0, -10), (10, -40), (-10, -40)]) -- Bottom fin
+      ]]
+
+initialState :: GameState
+initialState = GameState {player = initialPlayer, state = Play}
+
+initialPlayer :: Player
+initialPlayer = Player {position = (0, 0), direction = 0, lives = 3, speed = 0}

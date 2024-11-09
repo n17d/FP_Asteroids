@@ -7,3 +7,5 @@ import Graphics.Gloss
 import Model
 
 view :: GameState -> IO Picture
+view GameState{player = p} = return $ scale 10 10 $ pic
+         where pic = pictures(drawPlayer p)
