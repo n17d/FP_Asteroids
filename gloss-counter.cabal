@@ -18,4 +18,5 @@ executable gloss-counter
                      , View
 		     , Helper
 		     , Animation
+		     , Bullet
   default-language:    Haskell2010

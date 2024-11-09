@@ -9,6 +9,7 @@ import Graphics.Gloss
 import Helper
 import System.IO
 import System.Random
+import Bullet
 
 -- Datatypes
 data State = Pause | Play | GameOver
@@ -19,27 +20,40 @@ data EnemyShip = Easy | Medium | Hard
 
 data GameState = GameState
   { state :: State,
-    player :: Player
+    player :: Player,
+    bullets :: [Bullet],
+    rotatingLeft :: Bool,   -- Track if 'a' or left arrow is held down
+    rotatingRight :: Bool,  -- Track if 'd' or right arrow is held down
+    time :: Float -- Tracks time
   }
 
 data Player = Player
   { position :: Point, -- Player's position
     lives :: Int, -- Number of lives the player has
     speed :: Float, -- Player's movement speed
-    direction :: Float -- Player's direction
+    direction :: Float, -- Player's direction
+    rotation :: Int, -- Player's current rotation -1 is left 0 is neutral +1 is right
+    forward :: Bool -- True = forward, False = nothing
   }
 
+updatePlayer :: Player -> Player
+updatePlayer p@Player{rotation = rot, direction = dir} = p{direction = updateDir p, position = updatePos p}
+
+updateDir :: Player -> Float
+updateDir p@Player{rotation = rot, direction = dir} | rot == 1 = dir+6
+                                                    | rot == (-1) = dir-6
+                                                    | otherwise = dir
+
+updatePos :: Player -> Point
+updatePos p@Player{position = (x,y), forward = forw, direction = dir} | forw = newPosition dir (x, y)
+                                                         | otherwise = (x,y)
+
 drawPlayer :: Player -> [Picture]
-drawPlayer p@Player{position = (x, y), direction = dir} = [ pictures 
-      [ color blue (rectangleSolid 100 20),                      -- Body of the plane
-        color red (polygon [(-50, 0), (-80, 30), (-80, -30)]),  -- Left wing
-        color red (polygon [(50, 0), (80, 30), (80, -30)]),     -- Right wing
-        color green (polygon [(0, 10), (10, 40), (-10, 40)]),   -- Tail fin
-        color green (polygon [(0, -10), (10, -40), (-10, -40)]) -- Bottom fin
-      ]]
+drawPlayer p@Player{position = (x, y), direction = dir} =   [ translate x y $ rotate dir $ pictures 
+      [ color green (polygon [(-2, -2), (2, -2), (0, 2)]) ] ]
 
 initialState :: GameState
-initialState = GameState {player = initialPlayer, state = Play}
+initialState = GameState {player = initialPlayer, state = Play, rotatingLeft = False, rotatingRight = False, bullets = [], time = 0}
 
 initialPlayer :: Player
-initialPlayer = Player {position = (0, 0), direction = 0, lives = 3, speed = 0}
+initialPlayer = Player {position = (0, 0), direction = 0, lives = 3, speed = 0, rotation = 0, forward = False}
