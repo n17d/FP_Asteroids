@@ -20,4 +20,5 @@ executable gloss-counter
 		     , Animation
 		     , Bullet
 		     , Enemy
+		     , Asteroid
   default-language:    Haskell2010

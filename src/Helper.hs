@@ -6,21 +6,6 @@ import Graphics.Gloss
 import System.Random
 import Data.Fixed (mod')
 
-listToTuple2 :: [a] -> (a, a)
-listToTuple2 [x, y] = (x, y)
-
-checkWholeNumber :: Point -> Bool
-checkWholeNumber (x,y) = fromIntegral(round x) == x && fromIntegral(round y) == y
-
-distance :: Point -> Point -> Float
-distance (x1, y1) (x2, y2) = sqrt ((x2 - x1) ^ 2 + (y2 - y1) ^ 2)       
-
-roundPoint :: Point -> Point
-roundPoint (x,y) = (fromIntegral(round x), fromIntegral(round y))
-
-getNewRandom :: StdGen -> (Int, StdGen)
-getNewRandom gen = randomR (1, 100) gen
-
 newPosition :: Float -> Point -> Point
 newPosition dir (x, y) = (x + dx, y - dy) where
                       dx = 1 * cos dirRadians
@@ -41,5 +26,13 @@ tipPosition dir (x, y) = (x + dx, y - dy) where
           tipDistance = 3.5
           normalizedDir = dir `mod'` 360
           dirRadians = (normalizedDir - 90) * pi / 180
+
+targetPlayerDirection :: Point -> Point -> Float
+targetPlayerDirection (x, y) (px, py) = (90 - angleDegrees + 360) `mod'` 360
+  where
+    dx = px - x
+    dy = py - y
+    angleRadians = atan2 dy dx
+    angleDegrees = angleRadians * (180 / pi)
 
 
