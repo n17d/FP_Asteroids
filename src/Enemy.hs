@@ -7,6 +7,7 @@ import Helper
 import System.IO
 import System.Random
 import Bullet
+import Data.Fixed (mod')
 
 data Difficulty = Easy | Medium | Hard deriving (Eq)
 
@@ -24,8 +25,29 @@ updateEnemy (px, py) pdir e@Enemy{difficulty = diff}  | diff == Easy = [moveEnem
                                                       | diff == Medium = [moveEnemy e{edirection = changeDirection (tipPosition pdir (px, py) 20) e}] 
                                                       | otherwise = [moveEnemy e{edirection = changeDirection (px, py) e}]
 
-spawnEnemy :: Point -> Enemy
-spawnEnemy pos = Enemy{eposition = (0, 15), edirection = 180, targetPos = pos, espeed = 0.5, difficulty = Medium}
+randomDifficulty :: StdGen -> (Difficulty, StdGen)
+randomDifficulty g =
+  let (value, newGen) = randomR (0 :: Int, 2) g
+      diff = case value of
+                0 -> Easy
+                1 -> Medium
+                2 -> Hard
+  in (diff, newGen)
+
+createEnemy :: StdGen -> Enemy
+createEnemy g =
+  let (genX, gen1) = split g
+      (genY, gen2) = split gen1                  
+      (genDiff, _) = split gen2
+      x = fst $ randomR (-400, 400) genX
+      y = fst $ randomR (-300, 300) genY
+      (diff, _) = randomDifficulty genDiff
+  in Enemy { eposition = (x, y), difficulty = diff, edirection = 0, espeed = 1, targetPos = (0,0)}
+
+spawnEnemy :: Float -> StdGen -> [Enemy]
+spawnEnemy t g | t `mod'` 210 == 0 = [createEnemy g]
+               | otherwise = []
+
 
 moveEnemy :: Enemy -> Enemy
 moveEnemy e@Enemy{eposition = (ex, ey), edirection = edir} = e{eposition = newPosition edir (ex, ey) 0.5}
@@ -39,4 +61,6 @@ changeDirection (x,y) e@Enemy{eposition = (ex, ey), edirection = edir} | shortes
                                                                           shortestDiff = shortestAngleDifference targetDir edir
 
 drawEnemy :: Enemy -> [Picture]
-drawEnemy e@Enemy{eposition = (x,y), edirection = dir} = [ translate x y $ rotate dir $ pictures [ color red (polygon [(-2, -2), (2, -2), (0, 2)]) ] ]
+drawEnemy e@Enemy{eposition = (x,y), edirection = dir, difficulty = diff} | diff == Easy = [ translate x y $ rotate dir $ pictures [ color yellow (polygon [(-2, -2), (2, -2), (0, 2)]) ] ]
+                                                                          | diff == Medium = [ translate x y $ rotate dir $ pictures [ color orange (polygon [(-2, -2), (2, -2), (0, 2)]) ] ]
+                                                                          | otherwise = [ translate x y $ rotate dir $ pictures [ color red (polygon [(-2, -2), (2, -2), (0, 2)]) ] ]

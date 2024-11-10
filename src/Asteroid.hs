@@ -39,7 +39,7 @@ updateAsteroid :: Asteroid -> [Asteroid]
 updateAsteroid a = map moveAsteroid [a]
 
 spawnAsteroid :: Float -> StdGen -> Point -> [Asteroid]
-spawnAsteroid t g (x,y)| t `mod'` 120 == 0 = [createAsteroid g (x,y)]
+spawnAsteroid t g (x,y)| t `mod'` 90 == 0 = [createAsteroid g (x,y)]
                        | otherwise = []
 
 drawAsteroid :: Asteroid -> [Picture]

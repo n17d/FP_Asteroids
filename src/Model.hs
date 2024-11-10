@@ -12,6 +12,7 @@ import System.Random
 import Bullet
 import Enemy
 import Asteroid
+import Data.Fixed (mod')
 
 -- Datatypes
 data State = Pause | Play | GameOver
@@ -64,6 +65,37 @@ initialState = GameState {player = initialPlayer, state = Play, rotatingLeft = F
 initialPlayer :: Player
 initialPlayer = Player {position = (0, 0), direction = 0, lives = 3, speed = 0, rotation = 0, forward = False, invulnerability = False, invulnerabilityTime = 0}
 
+isCollisionBulletShip :: Bullet -> Point -> Bool
+isCollisionBulletShip Bullet{bulletPos = (bx, by)} (x,y) =
+  let distanceSquared = (bx - x) ^ 2 + (by - y) ^ 2
+      radiusSquared = 2 ^ 2
+  in distanceSquared <= radiusSquared
+
+isCollisionEnemyBullet :: Enemy -> Bullet -> Bool
+isCollisionEnemyBullet e@Enemy{eposition = (ex, ey)} Bullet{bulletPos = (bx, by)} =
+  let distanceSquared = (bx - ex) ^ 2 + (by - ey) ^ 2
+      radiusSquared = 2 ^ 2
+  in distanceSquared <= radiusSquared
+
+bulletIsHitByEnemy :: [Enemy] -> Bullet -> Bool
+bulletIsHitByEnemy e bullet  = any (`isCollisionEnemyBullet` bullet) e
+
+playerIsHitByBullet :: [Bullet] -> Point -> Bool
+playerIsHitByBullet bullets (x,y) = any (`isCollisionBulletShip` (x,y)) bullets
+
+enemyIsHitByBullet :: [Bullet] -> Enemy -> Bool
+enemyIsHitByBullet bullets e@Enemy{eposition = (ex, ey)} = any (`isCollisionBulletShip` (ex, ey)) bullets
+
+enemyBulletCollision :: [Bullet] -> [Enemy] -> [Bullet]
+enemyBulletCollision bs es = remainingBullets where remainingBullets = filter (not . bulletIsHitByEnemy es) bs
+
+bulletPlayerCollision :: Player -> [Bullet] -> Player
+bulletPlayerCollision p@Player{lives = hp, invulnerability = inv, position = (x,y)} bs | playerIsHitByBullet bs (x,y) && (not inv) = p{lives = hp-1, position = (0,0), direction = 0, invulnerability = True, invulnerabilityTime = 90}
+                                                                                       | otherwise = p
+
+bulletEnemyCollision :: [Bullet] -> [Enemy] ->  [Enemy]
+bulletEnemyCollision bs es = remainingEnemies where remainingEnemies = filter (not . enemyIsHitByBullet bs) es
+
 isCollisionBulletAsteroid :: Bullet -> Asteroid -> Bool
 isCollisionBulletAsteroid Bullet{bulletPos = (bx, by)} Asteroid{aposition = (ax, ay), size = radius} =
   let distanceSquared = (bx - ax) ^ 2 + (by - ay) ^ 2
@@ -94,9 +126,27 @@ isCollisionAsteroidPlayer Asteroid{aposition = (ax, ay), size = radius} Player{p
       radiusSquared = radius ^ 2
   in distanceSquared <= radiusSquared
 
+isCollisionEnemyPlayer :: Enemy -> Player -> Bool
+isCollisionEnemyPlayer Enemy{eposition = (ex, ey)} Player{position = (px, py)} =
+  let distanceSquared = (px - ex) ^ 2 + (py - ey) ^ 2
+      radiusSquared = 2 ^ 2
+  in distanceSquared <= radiusSquared
+
+playerIsHitByEnemy :: [Enemy] -> Player -> Bool
+playerIsHitByEnemy enemies player = any (`isCollisionEnemyPlayer` player) enemies
+
 playerIsHitByAsteroid :: [Asteroid] -> Player -> Bool
 playerIsHitByAsteroid asteroids player = any (`isCollisionAsteroidPlayer` player) asteroids
 
 asteroidPlayerCollision :: Player -> [Asteroid] -> Player
 asteroidPlayerCollision p@Player{lives = hp, invulnerability = inv} as | playerIsHitByAsteroid as p && (not inv) = p{lives = hp-1, position = (0,0), direction = 0, invulnerability = True, invulnerabilityTime = 90}
                                                                        | otherwise = p
+                                                                      
+enemyPlayerCollision :: Player -> [Enemy] -> Player
+enemyPlayerCollision p@Player{lives = hp, invulnerability = inv} es | playerIsHitByEnemy es p && (not inv) = p{lives = hp-1, position = (0,0), direction = 0, invulnerability = True, invulnerabilityTime = 90}
+                                                                    | otherwise = p
+
+enemyShoot :: Float -> Enemy -> [Bullet]
+enemyShoot t e@Enemy{eposition = epos, edirection = edir, difficulty = diff} | (t `mod'` 150 == 0) && (diff == Hard) = [createBullet (tipPosition edir epos 3) edir]
+                                                                             | otherwise = []
+
