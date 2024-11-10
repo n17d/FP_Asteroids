@@ -5,6 +5,7 @@ import Graphics.Gloss.Interface.IO.Game
 import Model
 import System.Random
 import View
+import Animation
 
 main :: IO ()
 main = do
