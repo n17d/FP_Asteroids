@@ -20,7 +20,7 @@ createBullet :: Point -> Float -> Bullet
 createBullet pos dir = Bullet{bulletPos = pos, bulletSpeed = 5, bDirection = dir, lifetime = 0}
 
 moveBullet :: Bullet -> Bullet
-moveBullet b@Bullet{bulletPos = (x,y), bDirection = bdir} = b{bulletPos = newPosition bdir (x,y)}
+moveBullet b@Bullet{bulletPos = (x,y), bDirection = bdir} = b{bulletPos = newPosition bdir (x,y) 1}
 
 updateBullet :: Bullet -> [Bullet]
 updateBullet b@Bullet{lifetime = life} | life <= 150 = [moveBullet b{lifetime = life + 1}]
@@ -28,4 +28,6 @@ updateBullet b@Bullet{lifetime = life} | life <= 150 = [moveBullet b{lifetime = 
 
 drawBullet :: Bullet -> [Picture]
 drawBullet b@Bullet{bulletPos = (x, y)} = [color white $ translate x y $ circleSolid 0.2]
+
+
 

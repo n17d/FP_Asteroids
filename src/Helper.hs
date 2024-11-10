@@ -6,10 +6,10 @@ import Graphics.Gloss
 import System.Random
 import Data.Fixed (mod')
 
-newPosition :: Float -> Point -> Point
-newPosition dir (x, y) = (x + dx, y - dy) where
-                      dx = 1 * cos dirRadians
-                      dy = 1 * sin dirRadians
+newPosition :: Float -> Point -> Float -> Point
+newPosition dir (x, y) sp = (x + dx, y - dy) where
+                      dx = sp * cos dirRadians
+                      dy = sp * sin dirRadians
                       normalizedDir = dir `mod'` 360
                       dirRadians = (normalizedDir - 90) * pi / 180
 
@@ -19,11 +19,10 @@ setRotation False True _ = 1    -- Rotate right if only `d` is pressed
 setRotation False False _ = 0   -- Stop rotating if neither `a` nor `d` is pressed
 setRotation _ _ _ = 0           -- Default to stop rotation
 
-tipPosition :: Float -> Point -> Point
-tipPosition dir (x, y) = (x + dx, y - dy) where
-          dx = tipDistance * cos dirRadians
-          dy = tipDistance * sin dirRadians
-          tipDistance = 3.5
+tipPosition :: Float -> Point -> Float -> Point
+tipPosition dir (x, y) td = (x + dx, y - dy) where
+          dx = td * cos dirRadians
+          dy = td * sin dirRadians
           normalizedDir = dir `mod'` 360
           dirRadians = (normalizedDir - 90) * pi / 180
 
@@ -34,5 +33,10 @@ targetPlayerDirection (x, y) (px, py) = (90 - angleDegrees + 360) `mod'` 360
     dy = py - y
     angleRadians = atan2 dy dx
     angleDegrees = angleRadians * (180 / pi)
+
+shortestAngleDifference :: Float -> Float -> Float
+shortestAngleDifference targetAngle currentAngle =
+  let diff = (targetAngle - currentAngle + 360) `mod'` 360
+  in if diff > 180 then diff - 360 else diff
 
 
