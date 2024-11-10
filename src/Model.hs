@@ -1,5 +1,3 @@
--- | This module contains the data types GameState, Enemy and Player.
---   which represent the state of the game.
 module Model where
 
 import Animation
@@ -44,11 +42,11 @@ updateDir p@Player{rotation = rot, direction = dir} | rot == 1 = dir+6
                                                     | otherwise = dir
 
 updatePos :: Player -> Point
-updatePos p@Player{position = (x,y), forward = forw, direction = dir} | forw = newPosition dir (x, y)
+updatePos p@Player{position = (x,y), forward = forw, direction = dir} | forw = Helper.newPosition dir (x, y)
                                                          | otherwise = (x,y)
 
 drawPlayer :: Player -> [Picture]
-drawPlayer p@Player{position = (x, y), direction = dir} =   [ translate x y $ rotate dir $ pictures 
+drawPlayer p@Player{position = (x, y), direction = dir} =   [ translate x y $ rotate dir $ pictures
       [ color green (polygon [(-2, -2), (2, -2), (0, 2)]) ] ]
 
 initialState :: GameState

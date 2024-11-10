@@ -1,19 +1,12 @@
 module Bullet where
 
-import Data.List
-import Data.Ord
 import Graphics.Gloss
-import Helper
-import System.IO
-import System.Random
-
 
 data Bullet = Bullet
-  { 
-    bulletPos :: Point, -- Bullet's current position (x, y)
-    bulletSpeed :: Float, -- Bullet's speed
-    bDirection :: Float, -- Bullet's direction
-    lifetime :: Float -- Bullet's lifetime
+  { bulletPos :: Point,
+    bulletSpeed :: Float,
+    bDirection :: Float,
+    lifetime :: Float
   }
 
 createBullet :: Point -> Float -> Bullet
@@ -27,5 +20,9 @@ updateBullet b@Bullet{lifetime = life} | life <= 150 = [moveBullet b{lifetime = 
                                        | otherwise = []
 
 drawBullet :: Bullet -> [Picture]
-drawBullet b@Bullet{bulletPos = (x, y)} = [color white $ translate x y $ circleSolid 0.2]
+drawBullet Bullet{bulletPos = (x, y)} = [color white $ translate x y $ circleSolid 0.2]
 
+-- Function to calculate the new position of the bullet
+newPosition :: Float -> (Float, Float) -> (Float, Float)
+newPosition dir (x, y) = (x + speed * cos (dir * pi / 180), y + speed * sin (dir * pi / 180))
+  where speed = 5
