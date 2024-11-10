@@ -6,11 +6,11 @@ import Animation
 import Data.List
 import Data.Ord
 import Graphics.Gloss
-import Helper
+import Helper (newPosition)
 import System.IO
 import System.Random
 import Bullet
-import Asteroid
+import Asteroid (Asteroid(..), createAsteroid, moveAsteroid, updateAsteroids, drawAsteroid, isHit)
 
 -- Datatypes
 data State = Pause | Play | GameOver
