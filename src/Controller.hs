@@ -15,21 +15,23 @@ import Asteroid
 
 -- | Handle one iteration
 step :: Float -> GameState -> IO GameState
-step secs g@GameState{player = p@Player{position = (px, py), direction = dir}, bullets = bs, time = steps, state = st, enemies = e, asteroids = as, randomize = rand} | st == Play = return $ checkGameOver $ g{player = enemyPlayerCollision (bulletPlayerCollision (asteroidPlayerCollision (updatePlayer p) as) bs) e, bullets = (concatMap (enemyShoot steps) e) ++ (enemyBulletCollision (asteroidBulletCollision (concatMap updateBullet bs) as) e), time = steps + 1, enemies = (bulletEnemyCollision bs (concatMap (updateEnemy (px, py) dir) e)) ++ (spawnEnemy steps rand), asteroids = bulletAsteroidCollision bs ((spawnAsteroid steps rand (px, py)) ++ (concatMap updateAsteroid as)), randomize = mkStdGen $ round(steps * steps)}
+step secs g@GameState{player = p@Player{position = (px, py), direction = dir}, bullets = bs, time = steps, state = st, enemies = e, asteroids = as, randomize = rand, score = sc} | st == Play = return $ checkGameOver $ g{player = enemyPlayerCollision (bulletPlayerCollision (asteroidPlayerCollision (updatePlayer p) as) bs) e, bullets = (concatMap (enemyShoot steps) e) ++ (enemyBulletCollision (asteroidBulletCollision (concatMap updateBullet bs) as) e), time = steps + 1, enemies = (bulletEnemyCollision bs (concatMap (updateEnemy (px, py) dir) e)) ++ (spawnEnemy steps rand), asteroids = bulletAsteroidCollision bs ((spawnAsteroid steps rand (px, py)) ++ (concatMap updateAsteroid as)), randomize = mkStdGen $ round(steps * steps), score = sc+1}
                                                                                                                                                                       | st == Pause = return g
                                                                                                                                                                       | otherwise = return g
 
 -- | Handle user input
 input :: Event -> GameState -> IO GameState
 input (EventKey (SpecialKey KeyDelete) Down _ _) gstate = do exitSuccess
-input (EventKey key Down _ _) g@GameState{player = p@Player{position = pos, direction = dir}, rotatingLeft = left, rotatingRight = right, bullets = bs, state = st, enemies = e, asteroids = as, randomize = rand}   
+input (EventKey key Down _ _) g@GameState{player = p@Player{position = pos, direction = dir}, rotatingLeft = left, rotatingRight = right, bullets = bs, state = st, enemies = e, asteroids = as, randomize = rand, score = cscore}   
   | key `elem` [Char 'd', SpecialKey KeyRight] = return g { rotatingRight = True, player = p { rotation = 1 } }
   | key `elem` [Char 'a', SpecialKey KeyLeft] = return g { rotatingLeft = True, player = p { rotation = (-1) } }
   | key `elem` [Char 'w', SpecialKey KeyUp] = return g { player = p { forward = True } }
   | key `elem` [Char ' ', SpecialKey KeySpace] = return g{bullets = (createBullet (tipPosition dir pos 3.5) dir) : bs}
   | key `elem` [Char 'p', SpecialKey KeyEsc] = if st == Play then return g {state = Pause} else return g {state = Play}
-  | key `elem` [Char 'g'] = if (st == GameOver) then return initialState {state = Play, randomize = rand} else return g
-    
+  | key `elem` [Char 'g'] = if (st == GameOver) then do 
+                                                     appendFile "scores.txt" (show (cscore) ++ "\n")
+                                                     return initialState {randomize = rand}
+                                                     else return g
 input (EventKey key Up _ _) g@GameState{player = p, rotatingLeft = left, rotatingRight = right}   
   | key `elem` [Char 'd', SpecialKey KeyRight] = 
       return g { rotatingRight = False, player = p { rotation = setRotation left False left } }

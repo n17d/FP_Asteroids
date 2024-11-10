@@ -10,11 +10,11 @@ import Bullet
 import Asteroid
 
 view :: GameState -> IO Picture
-view GameState{player = p@Player{rotation = rot, direction = dir, lives = hp}, bullets = bs, time = steps, state = st, enemies = e, asteroids = as}
-        | st == GameOver = return $ scale 10 10 $ pictures ([color white $ translate 0 0 $ scale 0.01 0.01 $ text "GAMEOVER"] ++ [color white $ translate (-5) (-10) $ scale 0.01 0.01 $ text "Press G to continue"])
+view GameState{player = p@Player{rotation = rot, direction = dir, lives = hp}, bullets = bs, time = steps, state = st, enemies = e, asteroids = as, score = cscore}
+        | st == GameOver = return $ scale 10 10 $ pictures ([color yellow $ translate (-20) 0 $ scale 0.05 0.05 $ text "GAMEOVER"] ++ [color yellow $ translate (-35) (-10) $ scale 0.05 0.05 $ text "Press G to continue"])
         | st == Pause = return $ scale 10 10 $ pictures ([color yellow $ translate (-35) 0 $ scale 0.05 0.05 $ text "You paused the game."] ++ [color yellow $ translate (-53) (-10) $ scale 0.05 0.05 $ text "Click P or ESC again to unpause."])
         | otherwise = return $ scale 10 10 $ pic
-          where pic = pictures(drawPlayer p ++ concatMap drawBullet bs ++ showTime ++ concatMap drawEnemy e ++ concatMap drawAsteroid as ++ showLives)
+          where pic = pictures(drawPlayer p ++ concatMap drawBullet bs ++ showTime ++ concatMap drawEnemy e ++ concatMap drawAsteroid as ++ showLives ++ showScore)
                 showTime = [color yellow $ translate 70 0 $ scale 0.01 0.01 $ text ("TIME: " ++ show (floor (steps / 30)))]
                 showLives = [color yellow $ translate 70 40 $ scale 0.01 0.01 $ text ("LIVES: " ++ show (hp))]
-                scoreAmount = [color yellow $ translate 70 50 $ scale 0.01 0.01 $ text ("SCORE: " ++ show (hp))]
+                showScore = [color yellow $ translate 70 50 $ scale 0.01 0.01 $ text ("SCORE: " ++ show (cscore))]
