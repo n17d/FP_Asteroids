@@ -41,6 +41,10 @@ data Player = Player
     invulnerabilityTime :: Float
   }
 
+checkGameOver :: GameState -> GameState
+checkGameOver g@GameState{player = p@Player{lives = hp}} | hp <= 0    = g { state = GameOver }
+                                                         | otherwise  = g
+
 updatePlayer :: Player -> Player
 updatePlayer p@Player{rotation = rot, direction = dir, invulnerability = inv, invulnerabilityTime = invtime} | inv && (invtime /= 0) = p{direction = updateDir p, position = updatePos p, invulnerabilityTime = invtime-1}
                                                                                                              | inv && invtime == 0 = p{direction = updateDir p, position = updatePos p, invulnerability = False}
